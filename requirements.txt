@@ -1,0 +1,7 @@
+python-telegram-bot==13.15
+requests
+SQLAlchemy
+matplotlib
+pandas
+psycopg2-binary
+seaborn
