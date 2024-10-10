@@ -62,14 +62,19 @@ def send_graphs(update: Update, context: CallbackContext, session):
         top5 = model_df.nlargest(5, 'rating')[['question', 'answer', 'rating']]
 
         bottom5 = model_df.nsmallest(5, 'rating')[['question', 'answer', 'rating']]
+        if not top5.empty:
+            top_title = f"Top-5 {model_name} answers"
+            top_buf = create_table_image(top5, top_title)
+            update.effective_message.reply_document(document=top_buf, filename='top_answers.png')
+        else:
+            update.effective_message.reply_text(f"No top answers available for {model_name}.")
 
-        top_title = f"Top-5 {model_name} answers"
-        top_buf = create_table_image(top5, top_title)
-        update.effective_message.reply_photo(photo=top_buf)
-
-        bottom_title = f"Bottom-5 {model_name} answers"
-        bottom_buf = create_table_image(bottom5, bottom_title)
-        update.effective_message.reply_photo(photo=bottom_buf)
+        if not bottom5.empty:
+            bottom_title = f"Bottom-5 {model_name} answers"
+            bottom_buf = create_table_image(bottom5, bottom_title)
+            update.effective_message.reply_document(document=bottom_buf, filename='bottom_answers.png')
+        else:
+            update.effective_message.reply_text(f"No bottom answers available for {model_name}.")
 
 
 def create_table_image(df_table, title):
@@ -78,7 +83,7 @@ def create_table_image(df_table, title):
     for col in ['question', 'answer']:
         df_table[col] = df_table[col].apply(lambda x: '\n'.join(textwrap.wrap(x, width=max_colwidth)))
 
-    num_rows = len(df_table)
+    num_rows = max(len(df_table), 5)
     fig_height = num_rows * 0.6 + 1
     fig_width = 30
 
